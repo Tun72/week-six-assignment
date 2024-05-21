@@ -1,48 +1,45 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function App() {
-  const [todos, setTodos] = useState([]);
-  useEffect(() => {
-    async function fetchData() {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/todos"
-      );
+  const [id, setId] = useState("");
+  const [error, setError] = useState(false);
+  const [todo, setTodo] = useState(null);
 
-      if (!response.ok) return;
-
-      const data = await response.json();
-      setTodos((prev) => [...prev, ...data]);
+  async function handelSubmit(e) {
+    e.preventDefault();
+    if (id <= 0) {
+      setError(true);
+      setTodo(null);
+      return;
     }
+    const response = await fetch(
+      `https://jsonplaceholder.typicode.com/todos/${id}`
+    );
 
-    fetchData();
-  }, [todos]);
+    if (!response.ok) return;
+
+    const data = await response.json();
+    setTodo(data);
+    setId("");
+    setError("")
+  }
   return (
     <section>
-      <table>
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Title</th>
-            <th>Completed</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {todos.map((todo, index) => (
-            <tr key={index}>
-              <td>{todo.id}</td>
-              <td>{todo.title}</td>
-              <td>
-                {todo.completed ? (
-                  <p className="done">Done</p>
-                ) : (
-                  <p className="none">None</p>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <form onSubmit={handelSubmit}>
+        <input type="text" value={id} onChange={(e) => setId(e.target.value)} />
+        <button type="submit">Get Data</button>
+      </form>
+      <div>
+        {error && <h1>Please enter an valid id.(e.g. 1,2,3,4,5..)</h1>}
+        {todo && (
+          <div>
+            <h1>id- {todo.id}</h1>
+            <p>title - {todo.title}</p>
+            <p>userId- {todo.userId}</p>
+            <p>complete- {todo.complete ? "Completed" : "Not Completed"}</p>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
